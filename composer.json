@@ -1,0 +1,25 @@
+{
+  "name": "Eniams/Spy",
+  "type": "library",
+  "description": "Handler to know if an object was modified",
+  "keywords": ["object", "event", "immutable"],
+  "homepage": "https://github.com/ismail1432/spy",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Smaïne Milianni",
+      "email": "contact@smaine.me"
+    }
+  ],
+  "require": {
+    "php": "^7.2.5",
+  },
+  "autoload": {
+    "psr-4": { "Eniams\\Spy\\": "src/" },
+    "exclude-from-classmap": [
+      "/Tests/"
+    ]
+  },
+  "minimum-stability": "dev"
+  }
+}
