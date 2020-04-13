@@ -1,0 +1,12 @@
+parameters:
+    paths:
+        - src
+
+    excludes_analyse:
+        - %currentWorkingDirectory%/src/Property/PropertyChecker.php
+
+    ignoreErrors:
+        - '#Ternary operator condition is always true.#'
+        - '/Parameter #2 \$code of class Eniams\\Spy\\Exception\\UndefinedClonerException constructor expects int, string given./'
+        - '/Parameter #3 \$previous of class Eniams\\Spy\\Exception\\UndefinedClonerException constructor expects Throwable\|null, string given./'
+

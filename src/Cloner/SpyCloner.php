@@ -8,7 +8,11 @@ class SpyCloner implements ClonerInterface
 {
     use CacheClassInfoTrait;
 
+    private $initialized = false;
+
     private $cachedClassInfo = [];
+
+    private $propertyObjectToClone = [];
 
     /**
      * {@inheritdoc}
@@ -18,8 +22,7 @@ class SpyCloner implements ClonerInterface
         $cloned = clone $toClone;
         $classInfo = $this->getCacheClassInfo()->getClassInfo($cloned);
 
-        $propertyObjectToClone = $this->supportCloneObjectProperties($toClone) ?
-                $toClone::getPropertiesObjectToClone() : [];
+        $this->initializePropertyObjectToLoad($toClone);
 
         foreach ($classInfo->getProperties() as $property) {
             $propertyName = $property->getName();
@@ -27,13 +30,37 @@ class SpyCloner implements ClonerInterface
             $propertyReflected->setAccessible(true);
             $value = $propertyReflected->getValue($toClone);
 
-            if (is_object($value) && \in_array($propertyName, $propertyObjectToClone)) {
-                $value = $this->doClone($value);
+            // Clone deeper properties given by `SpyClonerLoadPropertyObjectInterface::getPropertiesObjectToClone`
+            if (\in_array($propertyName, $this->propertyObjectToClone)) {
+                $value = $this->cloneVar($value);
             }
             $propertyReflected->setValue($cloned, $value);
         }
 
         return $cloned;
+    }
+
+    private function cloneArray($array): array
+    {
+        $copied = [];
+        foreach ($array as $key => $toCopy) {
+            $copied[$key] = $this->cloneVar($toCopy);
+        }
+
+        return $copied;
+    }
+
+    private function cloneVar($toCopy)
+    {
+        if (is_array($toCopy)) {
+            return $this->cloneArray($toCopy);
+        }
+
+        if (is_object($toCopy)) {
+            return $this->doClone($toCopy);
+        }
+
+        return $toCopy;
     }
 
     /**
@@ -47,5 +74,15 @@ class SpyCloner implements ClonerInterface
     public function supportCloneObjectProperties($object): bool
     {
         return $object instanceof SpyClonerLoadPropertyObjectInterface;
+    }
+
+    public function initializePropertyObjectToLoad($object): void
+    {
+        if (!$this->initialized) {
+            $this->initialized = true;
+            $this->propertyObjectToClone = $this->supportCloneObjectProperties($object) ?
+                /* @var SpyClonerLoadPropertyObjectInterface $object */
+                $object::getPropertiesObjectToClone() : [];
+        }
     }
 }

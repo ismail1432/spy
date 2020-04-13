@@ -6,7 +6,7 @@ test: ## Run test suite
 	./vendor/bin/phpunit Tests
 
 phpstan: ## Run PHPStan
-	./vendor/bin/phpstan analyse src --level=5
+	./vendor/bin/phpstan analyse --level=5
 
 .PHONY: help
 
