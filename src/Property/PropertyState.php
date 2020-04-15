@@ -13,13 +13,7 @@ class PropertyState
     private $currentValue;
     private $isModified;
 
-    /**
-     * PropertyState constructor.
-     * @param $property
-     * @param $initialValue
-     * @param $currentValue
-     */
-    public function __construct(string $fqcn,string $property, $initialValue, $currentValue)
+    public function __construct(string $fqcn, string $property, $initialValue, $currentValue)
     {
         $this->fqcn = $fqcn;
         $this->property = $property;

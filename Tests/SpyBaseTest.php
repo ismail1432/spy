@@ -1,8 +1,8 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use Eniams\Spy\SpyBase;
 use Eniams\Spy\Spy;
+use Eniams\Spy\SpyBase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Smaïne Milianni <contact@smaine.me>

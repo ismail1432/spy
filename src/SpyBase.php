@@ -14,7 +14,7 @@ class SpyBase
 
     public function add(string $id, object $toSpy): void
     {
-        if(!array_key_exists($id, $this->spies)) {
+        if (!array_key_exists($id, $this->spies)) {
             $this->spies[$id] = new Spy($toSpy);
         }
     }
@@ -31,7 +31,7 @@ class SpyBase
 
     public function remove(string $id)
     {
-        if(array_key_exists($id, $this->spies)) {
+        if (array_key_exists($id, $this->spies)) {
             unset($this->spies[$id]);
         }
     }

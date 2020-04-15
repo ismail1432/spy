@@ -20,7 +20,7 @@ class UncomparableExceptionTest extends TestCase
     public function testThrowUncomparableException($referenceInitialState, $reference)
     {
         $this->expectException(UncomparableException::class);
-        $this->expectExceptionMessage(sprintf("Cannot compare %s and %s because object are different", get_class($referenceInitialState), get_class($reference)));
+        $this->expectExceptionMessage(sprintf('Cannot compare %s and %s because object are different', get_class($referenceInitialState), get_class($reference)));
 
         PropertyStateFactory::createPropertyState('foo', $referenceInitialState, $reference);
     }

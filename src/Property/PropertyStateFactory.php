@@ -20,8 +20,8 @@ final class PropertyStateFactory
 
     public static function createPropertyState(string $property, $referenceInitialState, $reference): PropertyState
     {
-        if(get_class($referenceInitialState) !== get_class($reference)) {
-            throw new UncomparableException(sprintf("Cannot compare %s and %s because object are different", get_class($referenceInitialState), get_class($reference)));
+        if (get_class($referenceInitialState) !== get_class($reference)) {
+            throw new UncomparableException(sprintf('Cannot compare %s and %s because object are different', get_class($referenceInitialState), get_class($reference)));
         }
 
         $accessor = self::getPropertyAccessor();

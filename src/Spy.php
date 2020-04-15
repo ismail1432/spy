@@ -2,9 +2,9 @@
 
 namespace Eniams\Spy;
 
-use Eniams\Spy\Property\PropertyStateFactory;
-use Eniams\Spy\Property\PropertyState;
 use Eniams\Spy\Exception\UncopiableException;
+use Eniams\Spy\Property\PropertyState;
+use Eniams\Spy\Property\PropertyStateFactory;
 
 /**
  * @author Smaïne Milianni <contact@smaine.me>
@@ -28,7 +28,7 @@ final class Spy
         $this->reference = $reference;
         try {
             $this->referenceAtInitialState = \unserialize(\serialize($this->reference));
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             throw new UncopiableException($e->getMessage());
         }
     }
@@ -45,7 +45,7 @@ final class Spy
 
     public function isModified(): bool
     {
-       // var_dump($this->referenceAtInitialState, $this->reference);die;
+        // var_dump($this->referenceAtInitialState, $this->reference);die;
         return $this->referenceAtInitialState != $this->reference;
     }
 
@@ -62,6 +62,7 @@ final class Spy
     // @Todo Implement method to check if a property was modified
     public function isPropertyModified(string $property): bool
     {
+        return $this->getPropertyState($property)->isModified();
     }
 
     // @Todo Dispatch an event when the given property is modified

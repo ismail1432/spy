@@ -1,11 +1,11 @@
 <?php
 
 use Eniams\Spy\Property\PropertyState;
+use Eniams\Spy\Spy;
 use Eniams\Spy\Tests\Fixtures\Children;
 use Eniams\Spy\Tests\Fixtures\GrandParent;
 use Eniams\Spy\Tests\Fixtures\Root;
 use PHPUnit\Framework\TestCase;
-use Eniams\Spy\Spy;
 
 /**
  * @author Smaïne Milianni <contact@smaine.me>
@@ -134,17 +134,17 @@ final class SpyTest extends TestCase
         $grandPa = (new GrandParent())->setName('grand Pa')->setRoot($this->getRootFixture());
 
         return [
-            [$grandPa]
+            [$grandPa],
         ];
     }
-    
+
     private function getRootFixture(): Root
     {
         $boy = (new Children())->setName('Jon');
         $girl = (new Children())->setName('Sara');
 
-        $dad = (new Root)->setName('daddy')->addChildren($boy)->addChildren($girl);
-        
+        $dad = (new Root())->setName('daddy')->addChildren($boy)->addChildren($girl);
+
         return $dad;
     }
 }
