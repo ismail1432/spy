@@ -1,11 +1,11 @@
 <?php
 
-use Eniams\Spy\Property\PropertyStateFactory;
 use Eniams\Spy\Property\PropertyState;
+use Eniams\Spy\Property\PropertyStateFactory;
 use Eniams\Spy\Tests\Fixtures\Children;
-use PHPUnit\Framework\TestCase;
 use Eniams\Spy\Tests\Fixtures\GrandParent;
 use Eniams\Spy\Tests\Fixtures\Root;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @author Smaïne Milianni <contact@smaine.me>
