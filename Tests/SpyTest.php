@@ -30,6 +30,7 @@ final class SpyTest extends TestCase
         $this->assertEquals('grand Pa', $propertyState->getInitialValue());
         $this->assertEquals('grand Pa', $propertyState->getCurrentValue());
         $this->assertEquals(GrandParent::class, $propertyState->getFqcn());
+
         $this->assertEquals('name', $propertyState->getPropertyName());
     }
 

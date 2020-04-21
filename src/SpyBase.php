@@ -8,11 +8,14 @@ namespace Eniams\Spy;
 class SpyBase
 {
     /**
-     * @var array|Spy
+     * @var Spy[]
      */
     private $spies = [];
 
-    public function add(string $id, object $toSpy): void
+    /**
+     * @param object $toSpy
+     */
+    public function add(string $id, $toSpy): void
     {
         if (!array_key_exists($id, $this->spies)) {
             $this->spies[$id] = new Spy($toSpy);
@@ -24,18 +27,24 @@ class SpyBase
         return $this->spies[$id] ?? null;
     }
 
-    public function set(string $id, $toSpy): void
+    /**
+     * @param object $toSpy
+     */
+    public function set(string $id, $toSpy): Spy
     {
-        $this->spies[$id] = new Spy($toSpy);
+        return $this->spies[$id] = new Spy($toSpy);
     }
 
-    public function remove(string $id)
+    public function remove(string $id): void
     {
         if (array_key_exists($id, $this->spies)) {
             unset($this->spies[$id]);
         }
     }
 
+    /**
+     * @return Spy[]
+     */
     public function all()
     {
         return $this->spies;

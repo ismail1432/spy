@@ -50,7 +50,7 @@ class PropertyStateFactoryTest extends TestCase
         $fooUpdated = new Root();
         $fooUpdated->addChildren((new Children())->setName('boy'));
 
-        $propertyState = PropertyStateFactory::createPropertyState('children', $foo, $fooUpdated);
+        $propertyState = PropertyStateFactory::createPropertyState('childrens', $foo, $fooUpdated);
 
         $this->assertTrue($propertyState->isModified());
         $this->assertEquals([], $propertyState->getInitialValue());
