@@ -68,6 +68,8 @@ final class SpyTest extends TestCase
         $fixture->getRoot()->setName('update name');
         $rootBeforeChange = $this->getRootFixture();
 
+        var_dump($spied->getInitial()->getRoot()->getName());
+        exit;
         $this->assertTrue($spied->isModified());
         $this->assertFalse($spied->isNotModified());
 

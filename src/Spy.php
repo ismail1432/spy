@@ -2,6 +2,7 @@
 
 namespace Eniams\Spy;
 
+use Eniams\Spy\Cloner\ChainCloner;
 use Eniams\Spy\Exception\UncopiableException;
 use Eniams\Spy\Property\PropertyChecker;
 use Eniams\Spy\Property\PropertyState;
@@ -13,11 +14,15 @@ use Eniams\Spy\Property\PropertyStateFactory;
 final class Spy
 {
     /**
+     * Object To Spy.
+     *
      * @var object
      */
     private $current;
 
     /**
+     * Initial state of the object, before modification.
+     *
      * @var object
      */
     private $initial;
@@ -32,11 +37,11 @@ final class Spy
      */
     private $propertyChecker;
 
-    public function __construct($current)
+    public function __construct($current, ChainCloner $cloner)
     {
         $this->current = $current;
         try {
-            $this->initial = $this->getPropertyChecker()->doClone($this->current, unserialize(serialize($this->current)));
+            $this->initial = $cloner->doClone($current);
         } catch (\Exception $e) {
             throw new UncopiableException($e->getMessage());
         }

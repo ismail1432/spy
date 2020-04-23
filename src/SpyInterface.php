@@ -8,7 +8,7 @@ namespace Eniams\Spy;
 interface SpyInterface
 {
     /**
-     * Unique Identifier that can be use when stored in @see SpyBase::add().
+     * Unique Identifier that can be use when stored in Eniams\Spy\SpyBase::add().
      */
     public function getIdentifier(): string;
 }

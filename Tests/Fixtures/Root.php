@@ -18,6 +18,11 @@ class Root
         return $this;
     }
 
+    public function getName()
+    {
+        return$this->name;
+    }
+
     public function addChildren(Children $children): self
     {
         $this->childrens[] = $children;
