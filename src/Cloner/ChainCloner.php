@@ -2,6 +2,8 @@
 
 namespace Eniams\Spy\Cloner;
 
+use Eniams\Spy\Exception\UndefinedClonerException;
+
 /**
  * Handle the copy of the spied object.
  *
@@ -35,7 +37,7 @@ final class ChainCloner
             }
         }
 
-        return false;
+        throw new UndefinedClonerException("Unable to resolve the Cloner, Did you forgot to implement %s or %s ?", DeepCopyClonerInterface::class, SpyClonerInterface::class)
     }
 
     /**
