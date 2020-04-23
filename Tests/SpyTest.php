@@ -1,5 +1,8 @@
 <?php
 
+use Eniams\Spy\Cloner\ChainCloner;
+use Eniams\Spy\Cloner\DeepCopyCloner;
+use Eniams\Spy\Cloner\SpyCloner;
 use Eniams\Spy\Property\PropertyState;
 use Eniams\Spy\Spy;
 use Eniams\Spy\Tests\Fixtures\Children;
@@ -13,12 +16,22 @@ use PHPUnit\Framework\TestCase;
 final class SpyTest extends TestCase
 {
     /**
+     * @var ChainCloner
+     */
+    private $cloner;
+
+    public function setUp(): void
+    {
+        $this->cloner = new ChainCloner([new DeepCopyCloner(), new SpyCloner()]);
+    }
+
+    /**
      * @dataProvider fixtureProvider
      */
     public function testIsModifiedWithoutModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
 
         $this->assertTrue($spied->isNotModified());
         $this->assertFalse($spied->isModified());
@@ -40,7 +53,7 @@ final class SpyTest extends TestCase
     public function testIsModifiedGrandPaModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
 
         $fixture->setName('update name');
 
@@ -64,12 +77,10 @@ final class SpyTest extends TestCase
     public function testIsModifiedRootNameModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
         $fixture->getRoot()->setName('update name');
         $rootBeforeChange = $this->getRootFixture();
 
-        var_dump($spied->getInitial()->getRoot()->getName());
-        exit;
         $this->assertTrue($spied->isModified());
         $this->assertFalse($spied->isNotModified());
 
@@ -90,7 +101,7 @@ final class SpyTest extends TestCase
     public function testIsModifiedRootChildrenModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
         $fixture->getRoot()->removeChildren(1);
         $rootBeforeChange = $this->getRootFixture();
 
@@ -114,10 +125,12 @@ final class SpyTest extends TestCase
     public function testIsModifiedChildrenModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
         $rootBeforeChange = $this->getRootFixture();
         $fixture->getRoot()->getChildren()[0]->setName('Update children Name');
 
+        var_dump($spied->isModified());
+        exit;
         $this->assertTrue($spied->isModified());
         $this->assertFalse($spied->isNotModified());
 

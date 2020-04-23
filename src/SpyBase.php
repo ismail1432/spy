@@ -2,6 +2,8 @@
 
 namespace Eniams\Spy;
 
+use Eniams\Spy\Cloner\ChainCloner;
+
 /**
  * This is the Spy base, this class will contains all spied object.
  *
@@ -15,6 +17,11 @@ final class SpyBase
     private $spies = [];
 
     /**
+     * @var ChainCloner
+     */
+    private $chainCloner;
+
+    /**
      * Add an object to spy in the spy base.
      *
      * @param object $toSpy
@@ -22,7 +29,7 @@ final class SpyBase
     public function add(string $id, $toSpy): void
     {
         if (!array_key_exists($id, $this->spies)) {
-            $this->spies[$id] = new Spy($toSpy);
+            $this->spies[$id] = new Spy($toSpy, $this->chainCloner);
         }
     }
 
@@ -41,7 +48,7 @@ final class SpyBase
      */
     public function set(string $id, $toSpy): Spy
     {
-        return $this->spies[$id] = new Spy($toSpy);
+        return $this->spies[$id] = new Spy($toSpy, $this->chainCloner);
     }
 
     /**
@@ -60,5 +67,10 @@ final class SpyBase
     public function all()
     {
         return $this->spies;
+    }
+
+    public function setChainCloner(ChainCloner $chainCloner): void
+    {
+        $this->chainCloner = $chainCloner;
     }
 }

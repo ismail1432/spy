@@ -18,13 +18,16 @@ class SpyCloner implements ClonerInterface
         $cloned = clone $toClone;
         $classInfo = $this->getCacheClassInfo()->getClassInfo($cloned);
 
+        $propertyObjectToClone = $this->supportCloneObjectProperties($toClone) ?
+                $toClone::getPropertiesObjectToClone() : [];
+
         foreach ($classInfo->getProperties() as $property) {
+            $propertyName = $property->getName();
             $propertyReflected = $classInfo->getReflectionClass()->getProperty($property->getName());
             $propertyReflected->setAccessible(true);
             $value = $propertyReflected->getValue($toClone);
 
-            // Load Doctrine Proxy
-            if ($value instanceof \Doctrine\ORM\Proxy\Proxy) {
+            if (is_object($value) && \in_array($propertyName, $propertyObjectToClone)) {
                 $value = $this->doClone($value);
             }
             $propertyReflected->setValue($cloned, $value);
@@ -39,5 +42,10 @@ class SpyCloner implements ClonerInterface
     public function supports($object): bool
     {
         return $object instanceof SpyClonerInterface;
+    }
+
+    public function supportCloneObjectProperties($object): bool
+    {
+        return $object instanceof SpyClonerLoadPropertyObjectInterface;
     }
 }

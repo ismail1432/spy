@@ -21,7 +21,7 @@ class PropertyChecker
      */
     public function isModified($initial, $current): bool
     {
-        SpyAssertion::isComparable($initial, $initial);
+        SpyAssertion::isComparable($initial, $current);
 
         $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
 
@@ -51,7 +51,7 @@ class PropertyChecker
      */
     public function isPropertyModified($initial, $current, string $propertyName, ClassInfo $classInfo = null): bool
     {
-        SpyAssertion::isComparable($initial, $initial);
+        SpyAssertion::isComparable($initial, $current);
 
         if (null === $classInfo) {
             $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);

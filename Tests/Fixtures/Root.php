@@ -2,10 +2,12 @@
 
 namespace Eniams\Spy\Tests\Fixtures;
 
+use Eniams\Spy\SpyInterface;
+
 /**
  * @author Smaïne Milianni <contact@smaine.me>
  */
-class Root
+class Root implements SpyInterface
 {
     private $name;
 
@@ -40,5 +42,10 @@ class Root
     public function getChildren(): ?array
     {
         return $this->childrens;
+    }
+
+    public function getIdentifier(): string
+    {
+        return 12345;
     }
 }

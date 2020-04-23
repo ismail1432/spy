@@ -37,6 +37,11 @@ final class Spy
      */
     private $propertyChecker;
 
+    /**
+     * $current is the object to spy, the cloner will be resolve in the $cloner.
+     *
+     * @param object $current
+     */
     public function __construct($current, ChainCloner $cloner)
     {
         $this->current = $current;

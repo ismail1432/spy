@@ -37,7 +37,7 @@ final class ChainCloner
             }
         }
 
-        throw new UndefinedClonerException("Unable to resolve the Cloner, Did you forgot to implement %s or %s ?", DeepCopyClonerInterface::class, SpyClonerInterface::class)
+        throw new UndefinedClonerException('Unable to resolve the Cloner, Did you forgot to implement %s or %s ?', DeepCopyClonerInterface::class, SpyClonerInterface::class);
     }
 
     /**

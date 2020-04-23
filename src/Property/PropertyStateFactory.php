@@ -12,7 +12,7 @@ final class PropertyStateFactory
 {
     public static function createPropertyState(string $property, $initial, $current): PropertyState
     {
-        SpyAssertion::isComparable($initial, $initial);
+        SpyAssertion::isComparable($initial, $current);
 
         $reflection = (new CacheClassInfo())
             ->getClassInfo($initial)
