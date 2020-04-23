@@ -14,7 +14,7 @@ class GrandParent implements SpyClonerLoadPropertyObjectInterface
 
     public static function getPropertiesObjectToClone(): array
     {
-        return ['root', 'childrens'];
+        return ['root', 'childrens', 'grandson'];
     }
 
     // Used by SpyTrait to define the Spy Id stored in SpyBase.

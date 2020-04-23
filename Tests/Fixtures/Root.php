@@ -2,12 +2,10 @@
 
 namespace Eniams\Spy\Tests\Fixtures;
 
-use Eniams\Spy\SpyInterface;
-
 /**
  * @author Smaïne Milianni <contact@smaine.me>
  */
-class Root implements SpyInterface
+class Root
 {
     private $name;
 

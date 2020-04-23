@@ -5,9 +5,9 @@ use Eniams\Spy\Cloner\DeepCopyCloner;
 use Eniams\Spy\Cloner\SpyCloner;
 use Eniams\Spy\Property\PropertyState;
 use Eniams\Spy\Spy;
-use Eniams\Spy\Tests\Fixtures\Children;
+use Eniams\Spy\Tests\Fixtures\FixtureProviderTrait;
 use Eniams\Spy\Tests\Fixtures\GrandParent;
-use Eniams\Spy\Tests\Fixtures\Root;
+use Eniams\Spy\Tests\Fixtures\GrandSon;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,6 +15,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class SpyTest extends TestCase
 {
+    use FixtureProviderTrait;
+
     /**
      * @var ChainCloner
      */
@@ -129,8 +131,6 @@ final class SpyTest extends TestCase
         $rootBeforeChange = $this->getRootFixture();
         $fixture->getRoot()->getChildren()[0]->setName('Update children Name');
 
-        var_dump($spied->isModified());
-        exit;
         $this->assertTrue($spied->isModified());
         $this->assertFalse($spied->isNotModified());
 
@@ -145,22 +145,21 @@ final class SpyTest extends TestCase
         $this->assertEquals('root', $propertyState->getPropertyName());
     }
 
-    public function fixtureProvider()
+    /**
+     * @dataProvider fixtureProvider
+     */
+    public function testIsModifiedGrandSonModification($fixture)
     {
-        $grandPa = (new GrandParent())->setName('grand Pa')->setRoot($this->getRootFixture());
+        // Grandson
+        $grandson = (new GrandSon())->setName('grand son');
 
-        return [
-            [$grandPa],
-        ];
-    }
+        /* @var GrandParent $fixture */
+        $fixture->getRoot()->getChildren()[0]->setGrandson($grandson);
+        $spied = new Spy($fixture, $this->cloner);
 
-    private function getRootFixture(): Root
-    {
-        $boy = (new Children())->setName('Jon');
-        $girl = (new Children())->setName('Sara');
+        $grandson->setName('Update grand son');
 
-        $dad = (new Root())->setName('daddy')->addChildren($boy)->addChildren($girl);
-
-        return $dad;
+        $this->assertTrue($spied->isModified());
+        $this->assertFalse($spied->isNotModified());
     }
 }
