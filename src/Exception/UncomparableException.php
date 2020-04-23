@@ -2,6 +2,9 @@
 
 namespace Eniams\Spy\Exception;
 
-class UncomparableException extends \Exception
+/**
+ * @author Smaïne Milianni <contact@smaine.me>
+ */
+class UncomparableException extends \RuntimeException
 {
 }

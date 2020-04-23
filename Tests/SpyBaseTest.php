@@ -1,7 +1,13 @@
 <?php
 
+use Eniams\Spy\Cloner\ChainCloner;
+use Eniams\Spy\Cloner\DeepCopyCloner;
+use Eniams\Spy\Cloner\DeepCopyClonerInterface;
+use Eniams\Spy\Cloner\SpyCloner;
 use Eniams\Spy\Spy;
 use Eniams\Spy\SpyBase;
+use Eniams\Spy\SpyInterface;
+use Eniams\Spy\SpyTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,6 +22,9 @@ final class SpyBaseTest extends TestCase
     protected function setUp(): void
     {
         $this->spyBase = new SpyBase();
+
+        $cloner = new ChainCloner([new DeepCopyCloner(), new SpyCloner()]);
+        $this->spyBase->setChainCloner($cloner);
 
         $this->foo = new Foo();
         $this->bar = new Bar();
@@ -90,10 +99,20 @@ final class SpyBaseTest extends TestCase
     }
 }
 
-class Foo
+class Foo implements DeepCopyClonerInterface
 {
+    public function getIdentifier(): string
+    {
+        return 'FooID';
+    }
 }
 
-class Bar
+class Bar implements SpyInterface
 {
+    use SpyTrait;
+
+    public function getId()
+    {
+        return 120;
+    }
 }

@@ -2,33 +2,25 @@
 
 namespace Eniams\Spy\Property;
 
-use Eniams\Spy\Exception\UncomparableException;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
+use Eniams\Spy\Assertion\SpyAssertion;
+use Eniams\Spy\Reflection\CacheClassInfo;
 
 /**
  * @author Smaïne Milianni <contact@smaine.me>
  */
 final class PropertyStateFactory
 {
-    private static $propertyAccessor;
-
-    private static function getPropertyAccessor(): PropertyAccessor
+    public static function createPropertyState(string $property, $initial, $current): PropertyState
     {
-        return self::$propertyAccessor = self::$propertyAccessor ?: PropertyAccess::createPropertyAccessor();
-    }
+        SpyAssertion::isComparable($initial, $current);
 
-    public static function createPropertyState(string $property, $referenceInitialState, $reference): PropertyState
-    {
-        if (get_class($referenceInitialState) !== get_class($reference)) {
-            throw new UncomparableException(sprintf('Cannot compare %s and %s because object are different', get_class($referenceInitialState), get_class($reference)));
-        }
+        $reflection = (new CacheClassInfo())
+            ->getClassInfo($initial)
+            ->getReflectionClass();
 
-        $accessor = self::getPropertyAccessor();
+        $propertyReflected = $reflection->getProperty($property);
+        $propertyReflected->setAccessible(true);
 
-        $initialValue = $accessor->getValue($referenceInitialState, $property);
-        $currentValue = $accessor->getValue($reference, $property);
-
-        return PropertyState::create(get_class($reference), $property, $initialValue, $currentValue);
+        return PropertyState::create(get_class($initial), $property, $propertyReflected->getValue($initial), $propertyReflected->getValue($current));
     }
 }

@@ -18,6 +18,11 @@ class Root
         return $this;
     }
 
+    public function getName()
+    {
+        return$this->name;
+    }
+
     public function addChildren(Children $children): self
     {
         $this->childrens[] = $children;
@@ -35,5 +40,10 @@ class Root
     public function getChildren(): ?array
     {
         return $this->childrens;
+    }
+
+    public function getIdentifier(): string
+    {
+        return 12345;
     }
 }

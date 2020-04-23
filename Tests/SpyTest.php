@@ -1,10 +1,13 @@
 <?php
 
+use Eniams\Spy\Cloner\ChainCloner;
+use Eniams\Spy\Cloner\DeepCopyCloner;
+use Eniams\Spy\Cloner\SpyCloner;
 use Eniams\Spy\Property\PropertyState;
 use Eniams\Spy\Spy;
-use Eniams\Spy\Tests\Fixtures\Children;
+use Eniams\Spy\Tests\Fixtures\FixtureProviderTrait;
 use Eniams\Spy\Tests\Fixtures\GrandParent;
-use Eniams\Spy\Tests\Fixtures\Root;
+use Eniams\Spy\Tests\Fixtures\GrandSon;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -12,13 +15,25 @@ use PHPUnit\Framework\TestCase;
  */
 final class SpyTest extends TestCase
 {
+    use FixtureProviderTrait;
+
+    /**
+     * @var ChainCloner
+     */
+    private $cloner;
+
+    public function setUp(): void
+    {
+        $this->cloner = new ChainCloner([new DeepCopyCloner(), new SpyCloner()]);
+    }
+
     /**
      * @dataProvider fixtureProvider
      */
     public function testIsModifiedWithoutModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
 
         $this->assertTrue($spied->isNotModified());
         $this->assertFalse($spied->isModified());
@@ -30,6 +45,7 @@ final class SpyTest extends TestCase
         $this->assertEquals('grand Pa', $propertyState->getInitialValue());
         $this->assertEquals('grand Pa', $propertyState->getCurrentValue());
         $this->assertEquals(GrandParent::class, $propertyState->getFqcn());
+
         $this->assertEquals('name', $propertyState->getPropertyName());
     }
 
@@ -39,7 +55,7 @@ final class SpyTest extends TestCase
     public function testIsModifiedGrandPaModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
 
         $fixture->setName('update name');
 
@@ -63,7 +79,7 @@ final class SpyTest extends TestCase
     public function testIsModifiedRootNameModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
         $fixture->getRoot()->setName('update name');
         $rootBeforeChange = $this->getRootFixture();
 
@@ -87,7 +103,7 @@ final class SpyTest extends TestCase
     public function testIsModifiedRootChildrenModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
         $fixture->getRoot()->removeChildren(1);
         $rootBeforeChange = $this->getRootFixture();
 
@@ -111,7 +127,7 @@ final class SpyTest extends TestCase
     public function testIsModifiedChildrenModification($fixture)
     {
         /** @var GrandParent $fixture */
-        $spied = new Spy($fixture);
+        $spied = new Spy($fixture, $this->cloner);
         $rootBeforeChange = $this->getRootFixture();
         $fixture->getRoot()->getChildren()[0]->setName('Update children Name');
 
@@ -129,22 +145,21 @@ final class SpyTest extends TestCase
         $this->assertEquals('root', $propertyState->getPropertyName());
     }
 
-    public function fixtureProvider()
+    /**
+     * @dataProvider fixtureProvider
+     */
+    public function testIsModifiedGrandSonModification($fixture)
     {
-        $grandPa = (new GrandParent())->setName('grand Pa')->setRoot($this->getRootFixture());
+        // Grandson
+        $grandson = (new GrandSon())->setName('grand son');
 
-        return [
-            [$grandPa],
-        ];
-    }
+        /* @var GrandParent $fixture */
+        $fixture->getRoot()->getChildren()[0]->setGrandson($grandson);
+        $spied = new Spy($fixture, $this->cloner);
 
-    private function getRootFixture(): Root
-    {
-        $boy = (new Children())->setName('Jon');
-        $girl = (new Children())->setName('Sara');
+        $grandson->setName('Update grand son');
 
-        $dad = (new Root())->setName('daddy')->addChildren($boy)->addChildren($girl);
-
-        return $dad;
+        $this->assertTrue($spied->isModified());
+        $this->assertFalse($spied->isNotModified());
     }
 }
