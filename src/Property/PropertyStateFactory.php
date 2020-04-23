@@ -2,7 +2,7 @@
 
 namespace Eniams\Spy\Property;
 
-use Eniams\Spy\Exception\UncomparableException;
+use Eniams\Spy\Assertion\SpyAssertion;
 use Eniams\Spy\Reflection\CacheClassInfo;
 
 /**
@@ -12,9 +12,7 @@ final class PropertyStateFactory
 {
     public static function createPropertyState(string $property, $initial, $current): PropertyState
     {
-        if (get_class($initial) !== get_class($current)) {
-            throw new UncomparableException(sprintf('Cannot compare %s and %s because object are different', get_class($initial), get_class($current)));
-        }
+        SpyAssertion::isComparable($initial, $initial);
 
         $reflection = (new CacheClassInfo())
             ->getClassInfo($initial)
