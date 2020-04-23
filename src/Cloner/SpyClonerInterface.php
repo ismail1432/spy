@@ -5,7 +5,7 @@ namespace Eniams\Spy\Cloner;
 use Eniams\Spy\SpyInterface;
 
 /**
- * To be implemented by the object you want to spy if you want to copy your object with
+ * To be implemented by the object to spy if you want to copy your object with
  * the SpyCloner.
  * Be aware that with this interface the modification on object that is stored
  * in a property may not be tracked.

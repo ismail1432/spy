@@ -44,10 +44,8 @@ class PropertyChecker
     /**
      * $property of object $initial and object $current will be compared to know if the property was modified.
      *
-     * @param object    $initial
-     * @param object    $current
-     * @param string    $property
-     * @param ClassInfo $classInfo
+     * @param object $initial
+     * @param object $current
      */
     public function isPropertyModified($initial, $current, string $propertyName, ClassInfo $classInfo = null): bool
     {
