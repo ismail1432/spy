@@ -96,29 +96,33 @@ class PropertyChecker
         return false;
     }
 
-    public function getPropertiesModified($initial, $current, string $propertyName, ClassInfo $classInfo = null)
+    /**
+     * @return PropertyState[]
+     */
+    public function getPropertiesModified($initial, $current): array
     {
         SpyAssertion::isComparable($initial, $current);
 
         $propertiesModified = [];
 
-        if (null === $classInfo) {
-            $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
-        }
+        $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
 
-        $extracted = new ValueExtractor($initial, $current, $propertyName, $classInfo);
+        foreach ($classInfo->getProperties() as $property) {
+            $propertyName = $property->getName();
+            $extracted = new ValueExtractor($initial, $current, $propertyName, $classInfo);
 
-        $initialValue = $extracted->getInitialValue();
-        $currentValue = $extracted->getCurrentValue();
+            $initialValue = $extracted->getInitialValue();
+            $currentValue = $extracted->getCurrentValue();
 
-        if ($currentValue instanceof \Doctrine\Common\Collections\Collection) {
-            if ([] !== $this->compareCollection($currentValue->toArray(), $initialValue->toArray())) {
-                $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $propertyName);
+            if ($currentValue instanceof \Doctrine\Common\Collections\Collection) {
+                if ([] !== $this->compareCollection($currentValue->toArray(), $initialValue->toArray())) {
+                    $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $currentValue);
+                }
             }
-        }
 
-        if ($initialValue != $currentValue) {
-            $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $propertyName);
+            if ($initialValue != $currentValue) {
+                $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $currentValue);
+            }
         }
 
         return $propertiesModified;

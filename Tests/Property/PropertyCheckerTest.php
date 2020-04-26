@@ -57,7 +57,58 @@ class PropertyCheckerTest extends TestCase
     public function testIsModifiedRootChildrenModification($fixture)
     {
         /* @var GrandParent $fixture */
-        $this->assertTrue($this->propertyChecker->isModified($fixture->getRoot()->getChildren()[1], $fixture->getRoot()->getChildren()[0]->setName('chase')));
+        $this->assertTrue($this->propertyChecker->isModified($fixture->getRoot()->getChildren()[1],
+            $fixture->getRoot()->getChildren()[0]->setName('chase')));
+    }
+
+    public function testGetModifiedPropertiesNameAndRoot()
+    {
+        $toSpy = $this->getGrandPaFixture();
+
+        // Update Name and Don't Have Root object
+        $spied = (new GrandParent())->setName('Updated Name');
+
+        $expectedPropertiesModified = [
+            'name',
+            'root',
+        ];
+
+        $propertiesModified = $this->propertyChecker->getPropertiesModified($toSpy, $spied);
+        $propertiesNameModified = [];
+
+        $this->assertIsArray($propertiesModified);
+        $this->assertCount(2, $propertiesModified);
+        foreach ($propertiesModified as $key => $propertyState) {
+            $this->assertInstanceOf(PropertyState::class, $propertyState);
+            $propertiesNameModified[] = $propertyState->getPropertyName();
+        }
+
+        $this->assertEquals($expectedPropertiesModified, $propertiesNameModified);
+        $this->assertEquals($propertiesModified, [
+            PropertyState::create(get_class($toSpy), 'name', 'grand Pa', 'Updated Name'),
+            PropertyState::create(get_class($toSpy), 'root', $toSpy->getRoot(), null),
+        ]);
+    }
+
+    /**
+     * @dataProvider fixtureProvider
+     */
+    public function testGetModifiedPropertiesChildrenName($fixture)
+    {
+        $toSpy = $fixture->getRoot()->getChildren()[1];
+        $spied = $fixture->getRoot()->getChildren()[0]->setName('chase');
+
+        $propertiesModified = $this->propertyChecker->getPropertiesModified($toSpy, $spied);
+
+        /** @var PropertyState $propertyState */
+        $propertyState = $propertiesModified[0];
+        $this->assertCount(1, $propertiesModified);
+        $this->assertInstanceOf(PropertyState::class, $propertyState);
+
+        $this->assertEquals(\Eniams\Spy\Tests\Fixtures\Children::class, $propertyState->getFqcn());
+        $this->assertEquals('name', $propertyState->getPropertyName());
+        $this->assertEquals('chase', $propertyState->getCurrentValue());
+        $this->assertEquals('Sara', $propertyState->getInitialValue());
     }
 
     public function testTitleBlacklistedPropertiesShouldNotBeChecked()
@@ -76,28 +127,6 @@ class PropertyCheckerTest extends TestCase
 
         // False because we don't check `content` as it's returned by propertiesBlackList
         $this->assertFalse($this->propertyChecker->isModified($toSpy, $copy));
-    }
-
-    /**
-     * @dataProvider modifiedPropertiesProvider
-     */
-    public function testGetModifiedProperties($toSpy, $spied, $propertyExpected)
-    {
-        $propertiesModified = $this->propertyChecker->getPropertiesModified($toSpy, $spied, $propertyExpected);
-
-        $this->assertIsArray($propertiesModified);
-        $this->assertCount(1, $propertiesModified);
-        $first = $propertiesModified[0];
-        $this->assertInstanceOf(PropertyState::class, $first);
-
-        $this->assertEquals($propertyExpected, $first->getPropertyName());
-    }
-
-    public function modifiedPropertiesProvider()
-    {
-        $grandPa = $this->getGrandPaFixture();
-
-        yield [$grandPa, (new GrandParent())->setName('Updated Name'), 'name'];
     }
 }
 
