@@ -1,5 +1,7 @@
 # Spy
 
+[![Build Status](https://travis-ci.com/ismail1432/spy.svg?branch=master)](https://travis-ci.org/ismail1432/spy)
+
 Spy helps you to know if an object was modified and allow you to fire/listen an event when the given object is modified.  
 
 ⚠️ *This project is a work in progress.* ⚠️
