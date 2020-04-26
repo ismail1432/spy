@@ -55,13 +55,10 @@ class PropertyChecker
             $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
         }
 
-        $propertyReflected =
-            $classInfo->getReflectionClass()
-                ->getProperty($propertyName);
-        $propertyReflected->setAccessible(true);
+        $extracted = new ValueExtractor($initial, $current, $propertyName, $classInfo);
 
-        $initialValue = $propertyReflected->getValue($initial);
-        $currentValue = $propertyReflected->getValue($current);
+        $initialValue = $extracted->getInitialValue();
+        $currentValue = $extracted->getCurrentValue();
 
         if ($currentValue instanceof \Doctrine\Common\Collections\Collection) {
             if ([] !== $this->compareCollection($currentValue->toArray(), $initialValue->toArray())) {
@@ -97,6 +94,34 @@ class PropertyChecker
         }
 
         return false;
+    }
+
+    public function getPropertiesModified($initial, $current, string $propertyName, ClassInfo $classInfo = null)
+    {
+        SpyAssertion::isComparable($initial, $current);
+
+        $propertiesModified = [];
+
+        if (null === $classInfo) {
+            $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
+        }
+
+        $extracted = new ValueExtractor($initial, $current, $propertyName, $classInfo);
+
+        $initialValue = $extracted->getInitialValue();
+        $currentValue = $extracted->getCurrentValue();
+
+        if ($currentValue instanceof \Doctrine\Common\Collections\Collection) {
+            if ([] !== $this->compareCollection($currentValue->toArray(), $initialValue->toArray())) {
+                $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $propertyName);
+            }
+        }
+
+        if ($initialValue != $currentValue) {
+            $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $propertyName);
+        }
+
+        return $propertiesModified;
     }
 
     private function compareCollection(array $first, array $second): array
