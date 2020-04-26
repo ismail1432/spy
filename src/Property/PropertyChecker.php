@@ -55,13 +55,10 @@ class PropertyChecker
             $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
         }
 
-        $propertyReflected =
-            $classInfo->getReflectionClass()
-                ->getProperty($propertyName);
-        $propertyReflected->setAccessible(true);
+        $extracted = new ValueExtractor($initial, $current, $propertyName, $classInfo);
 
-        $initialValue = $propertyReflected->getValue($initial);
-        $currentValue = $propertyReflected->getValue($current);
+        $initialValue = $extracted->getInitialValue();
+        $currentValue = $extracted->getCurrentValue();
 
         if ($currentValue instanceof \Doctrine\Common\Collections\Collection) {
             if ([] !== $this->compareCollection($currentValue->toArray(), $initialValue->toArray())) {
@@ -97,6 +94,38 @@ class PropertyChecker
         }
 
         return false;
+    }
+
+    /**
+     * @return PropertyState[]
+     */
+    public function getPropertiesModified($initial, $current): array
+    {
+        SpyAssertion::isComparable($initial, $current);
+
+        $propertiesModified = [];
+
+        $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
+
+        foreach ($classInfo->getProperties() as $property) {
+            $propertyName = $property->getName();
+            $extracted = new ValueExtractor($initial, $current, $propertyName, $classInfo);
+
+            $initialValue = $extracted->getInitialValue();
+            $currentValue = $extracted->getCurrentValue();
+
+            if ($currentValue instanceof \Doctrine\Common\Collections\Collection) {
+                if ([] !== $this->compareCollection($currentValue->toArray(), $initialValue->toArray())) {
+                    $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $currentValue);
+                }
+            }
+
+            if ($initialValue != $currentValue) {
+                $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $currentValue);
+            }
+        }
+
+        return $propertiesModified;
     }
 
     private function compareCollection(array $first, array $second): array

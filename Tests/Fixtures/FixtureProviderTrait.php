@@ -4,9 +4,14 @@ namespace Eniams\Spy\Tests\Fixtures;
 
 trait FixtureProviderTrait
 {
+    public function getGrandPaFixture()
+    {
+        return (new GrandParent())->setName('grand Pa')->setRoot($this->getRootFixture());
+    }
+
     public function fixtureProvider()
     {
-        $grandPa = (new GrandParent())->setName('grand Pa')->setRoot($this->getRootFixture());
+        $grandPa = $this->getGrandPaFixture();
 
         return [
             [$grandPa],
