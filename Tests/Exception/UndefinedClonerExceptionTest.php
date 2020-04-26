@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Eniams\Spy\Tests\Exception;
-
 
 use Eniams\Spy\Cloner\ChainCloner;
 use Eniams\Spy\Cloner\DeepCopyCloner;
@@ -59,5 +57,4 @@ class Dummy implements SpyClonerInterface
     {
         return '';
     }
-
 }

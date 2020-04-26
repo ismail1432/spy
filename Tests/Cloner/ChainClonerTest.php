@@ -1,11 +1,11 @@
 <?php
 
-use \PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class ChainClonerTest extends TestCase
 {
     /**
-     * @dataProvider clonerProvider
+     * @dataProvider clonerProviderPositiveSupport
      */
     public function testSupportsReturnTrueIfInterfaceInObjectToSpyMatchTheCloner($objectToSpy, $cloner)
     {
@@ -13,11 +13,26 @@ class ChainClonerTest extends TestCase
         $this->assertTrue($cloner->supports($objectToSpy));
     }
 
-    public function clonerProvider()
+    /**
+     * @dataProvider clonerProviderNegativeSupport
+     */
+    public function testSupportsReturnFalseIfInterfaceNotInObjectToSpyMatchTheCloner($objectToSpy, $cloner)
+    {
+        $this->assertFalse($cloner->supports($objectToSpy));
+    }
+
+    public function clonerProviderPositiveSupport()
     {
         yield [new Dummy(), new \Eniams\Spy\Cloner\DeepCopyCloner()];
         yield [new Foolk(), new \Eniams\Spy\Cloner\SpyCloner()];
         yield [new Bob(), new \Eniams\Spy\Cloner\SpyCloner()];
+    }
+
+    public function clonerProviderNegativeSupport()
+    {
+        yield [new Dummy(), new \Eniams\Spy\Cloner\SpyCloner()];
+        yield [new Foolk(), new \Eniams\Spy\Cloner\DeepCopyCloner()];
+        yield [new Bob(), new \Eniams\Spy\Cloner\DeepCopyCloner()];
     }
 }
 
@@ -43,6 +58,7 @@ class Bob implements \Eniams\Spy\Cloner\SpyClonerLoadPropertyObjectInterface
     {
         return '';
     }
+
     public static function getPropertiesObjectToClone(): array
     {
         return [];
