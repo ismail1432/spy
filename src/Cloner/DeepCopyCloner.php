@@ -7,7 +7,7 @@ use DeepCopy\DeepCopy;
 /**
  * Cloner that use the famous DeepCopy library: https://github.com/myclabs/DeepCopy.
  *
- * @author contact@smaine.me
+ * @author Smaïne Milianni <contact@smaine.me>
  */
 class DeepCopyCloner implements ClonerInterface
 {

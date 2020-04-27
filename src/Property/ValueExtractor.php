@@ -9,7 +9,7 @@ use Eniams\Spy\Reflection\ClassInfo;
 /**
  * @internal
  *
- * @author contact@smaine.me
+ * @author Smaïne Milianni <contact@smaine.me>
  */
 final class ValueExtractor
 {

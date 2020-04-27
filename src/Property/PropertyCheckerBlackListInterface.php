@@ -7,7 +7,7 @@ namespace Eniams\Spy\Property;
  *
  * @see PropertyChecker::isModified().
  *
- * @author contact@smaine.me
+ * @author Smaïne Milianni <contact@smaine.me>
  */
 interface PropertyCheckerBlackListInterface
 {

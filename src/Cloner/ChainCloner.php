@@ -7,7 +7,7 @@ use Eniams\Spy\Exception\UndefinedClonerException;
 /**
  * Handle the copy of the spied object.
  *
- * @author contact@smaine.me
+ * @author Smaïne Milianni <contact@smaine.me>
  */
 final class ChainCloner
 {
@@ -16,7 +16,7 @@ final class ChainCloner
      *
      * @internal
      */
-    public $cloners;
+    private $cloners;
 
     /**
      * @param ClonerInterface[] $cloners
