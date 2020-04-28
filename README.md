@@ -6,8 +6,6 @@ Spy helps you to know if an object was modified and allow you to fire/listen an 
 
 ⚠️ *This project is a work in progress.* ⚠️
 
-## Vanilla PHP
-
 ### How it works ?
 
 The initial object will be copied with a specific cloner then value of the initial (copied) object and the manipulated (current) object will be compared on demand to check if there is some modificiations.
@@ -59,7 +57,11 @@ class Foo implements \Eniams\Spy\Cloner\UserLandClonerInterface
 
 ```
 
-2. Register the Cloners in the `Eniams\Spy\ClonerChainCloner`
+If you're using Symfony thanks to the [autoconfigure tags](https://symfony.com/doc/current/service_container/tags.html) you don't have to follow the next step, the created cloner will be 
+registered to the `ChainCloner` that is responsible to clone the oject to spy.
+So you can go to step 3.
+ 
+2. For Vanilla PHP you need to Register the Cloners in the `Eniams\Spy\ClonerChainCloner`
 
 ```php
 <?php
@@ -70,7 +72,8 @@ class Foo implements \Eniams\Spy\Cloner\UserLandClonerInterface
 
 ```php
 <?php
-$spied = new \Eniams\Spy\Spy($foo, $chainCloner);
+// For Symfony, `ChainCloner $chainCloner` is a public service that can be retrieve from the container.
+$spied = new \Eniams\Spy\Spy($foo, $chainCloner); 
 
 $spied->isModified();
 $spied->isNotModified();
@@ -95,13 +98,29 @@ $propertyState->getInitialValue(); // 'Smaone'
 $propertyState->getCurrentValue(); // 'Dude'
 ```
 
-##### Working with Services container you can store an object to retrieve later in your application 
+##### Working with Services container you can store an object in the `SpyBase` to retrieve it later in your application 
 
+##### Symfony
 ```php
 <?php
-$object = (new \Foo\Entity\User())->setName('Smaone');
+class FooController extends AbstractController
+{
+    /**
+     * @Route("/foo", name="foo")
+     */
+    public function index(SpyBase $spyBase)
+    {
+        $user = (new \Foo\Entity\User())->setName('Smaone');
+        $spyBase = (new \Eniams\Spy\SpyBase());
+        $spyBase->add('your_key', $user);
+        
+```
+##### Vanilla PHP
+```php
+<?php
+$user = (new \Foo\Entity\User())->setName('Smaone');
 $spyBase = (new \Eniams\Spy\SpyBase());
-$spyBase->add('your_key', $object); // behind the scene $object is converted to a \Eniams\Spy\Spy object and the cloner class will be resolve by the interface implemented by the $object.
+$spyBase->add('your_key', $user); // behind the scene $object is converted to a \Eniams\Spy\Spy object and the cloner class will be resolve by the interface implemented by the $object.
 
 $yourContainer
     ->register('spy_base_service', $spyBase);
@@ -126,5 +145,3 @@ $propertyState->getProperty(); // 'name'
 $propertyState->getInitialValue(); // 'Smaone'
 $propertyState->getCurrentValue(); // 'Dude'
 ``` 
-
-## Symfony Integration
