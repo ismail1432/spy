@@ -5,7 +5,7 @@ namespace Eniams\Spy\Cloner;
 /**
  * Clone Object.
  *
- * @author contact@smaine.me
+ * @author Smaïne Milianni <contact@smaine.me>
  */
 interface ClonerInterface
 {
