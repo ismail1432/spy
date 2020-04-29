@@ -6,7 +6,19 @@ Spy helps you to know if an object was modified and allow you to fire/listen an 
 
 ⚠️ *This project is a work in progress.* ⚠️
 
+### Installation
+
+```ssh
+$ composer require eniams/spy
+```
+
 ### How it works ?
+
+![Spy Workflow](/images/spy_workflow.jpg?raw=true)
+
+![SpyBase Workflow](/images/spy_base_workflow.jpg?raw=true)
+
+### Behind the scene:
 
 The initial object will be copied with a specific cloner then value of the initial (copied) object and the manipulated (current) object will be compared on demand to check if there is some modificiations.
 
