@@ -1,5 +1,5 @@
 {
-  "name": "Eniams/Spy",
+  "name": "eniams/spy",
   "type": "library",
   "description": "Handler to know if an object was modified",
   "keywords": ["object", "event", "immutable"],
