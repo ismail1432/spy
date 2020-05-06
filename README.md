@@ -73,18 +73,19 @@ If you're using Symfony thanks to the [autoconfigure tags](https://symfony.com/d
 registered to the `ChainCloner` that is responsible to clone the oject to spy.
 So you can go to step 3.
  
-2. For Vanilla PHP you need to Register the Cloners in the `Eniams\Spy\ClonerChainCloner`
+2. For Vanilla PHP if you don't want to use the default cloners you can Register yours in the `Eniams\Spy\ClonerChainCloner`
 
 ```php
 <?php
- $chainCloner = new \Eniams\Spy\Cloner\ChainCloner([new DeepCopyCloner(), new SpyCloner(), new UserLandCloner()]);
+ $chainCloner = new \Eniams\Spy\Cloner\ChainCloner([new UserLandCloner()]);
 ```
 
 3. Time to spy your object :shipit: 
 
 ```php
 <?php
-// For Symfony, `ChainCloner $chainCloner` is a public service that can be retrieve from the container.
+// $chainCloner is optional and need to be use only if you want to use a custom cloners,
+// for Symfony remember that your custom cloner is already registered in the `ChainCloner $chainCloner` and it is a public service that can be retrieve from the container.
 $spied = new \Eniams\Spy\Spy($foo, $chainCloner); 
 
 $spied->isModified();

@@ -3,6 +3,8 @@
 namespace Eniams\Spy;
 
 use Eniams\Spy\Cloner\ChainCloner;
+use Eniams\Spy\Cloner\DeepCopyCloner;
+use Eniams\Spy\Cloner\SpyCloner;
 use Eniams\Spy\Exception\UncopiableException;
 use Eniams\Spy\Property\PropertyChecker;
 use Eniams\Spy\Property\PropertyState;
@@ -42,10 +44,11 @@ final class Spy
      *
      * @param object $current
      */
-    public function __construct($current, ChainCloner $cloner)
+    public function __construct($current, ChainCloner $cloner = null)
     {
         $this->current = $current;
         try {
+            $cloner = $cloner ?? $this->getCloner();
             $this->initial = $cloner->doClone($current);
         } catch (\Exception $e) {
             throw new UncopiableException($e->getMessage());
@@ -115,5 +118,10 @@ final class Spy
     // @Todo Dispatch an event when the given method is called
     public function spyMethod(string $method)
     {
+    }
+
+    private function getCloner(): ChainCloner
+    {
+        return new ChainCloner([new DeepCopyCloner(), new SpyCloner()]);
     }
 }
