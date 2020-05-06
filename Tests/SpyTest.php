@@ -52,6 +52,28 @@ final class SpyTest extends TestCase
     /**
      * @dataProvider fixtureProvider
      */
+    public function testIsModifiedWithoutModificationAndCloner($fixture)
+    {
+        /** @var GrandParent $fixture */
+        $spied = new Spy($fixture);
+
+        $this->assertTrue($spied->isNotModified());
+        $this->assertFalse($spied->isModified());
+
+        /** @var PropertyState $propertyState */
+        $propertyState = $spied->getPropertyState('name');
+
+        $this->assertFalse($propertyState->isModified());
+        $this->assertEquals('grand Pa', $propertyState->getInitialValue());
+        $this->assertEquals('grand Pa', $propertyState->getCurrentValue());
+        $this->assertEquals(GrandParent::class, $propertyState->getFqcn());
+
+        $this->assertEquals('name', $propertyState->getPropertyName());
+    }
+
+    /**
+     * @dataProvider fixtureProvider
+     */
     public function testIsModifiedGrandPaModification($fixture)
     {
         /** @var GrandParent $fixture */
@@ -76,10 +98,58 @@ final class SpyTest extends TestCase
     /**
      * @dataProvider fixtureProvider
      */
+    public function testIsModifiedGrandPaModificationAndCloner($fixture)
+    {
+        /** @var GrandParent $fixture */
+        $spied = new Spy($fixture);
+
+        $fixture->setName('update name');
+
+        $this->assertTrue($spied->isModified());
+        $this->assertFalse($spied->isNotModified());
+
+        /** @var PropertyState $propertyState */
+        $propertyState = $spied->getPropertyState('name');
+
+        $this->assertTrue($propertyState->isModified());
+        $this->assertFalse(!$propertyState->isModified());
+        $this->assertEquals('grand Pa', $propertyState->getInitialValue());
+        $this->assertEquals('update name', $propertyState->getCurrentValue());
+        $this->assertEquals(GrandParent::class, $propertyState->getFqcn());
+        $this->assertEquals('name', $propertyState->getPropertyName());
+    }
+
+    /**
+     * @dataProvider fixtureProvider
+     */
     public function testIsModifiedRootNameModification($fixture)
     {
         /** @var GrandParent $fixture */
         $spied = new Spy($fixture, $this->cloner);
+        $fixture->getRoot()->setName('update name');
+        $rootBeforeChange = $this->getRootFixture();
+
+        $this->assertTrue($spied->isModified());
+        $this->assertFalse($spied->isNotModified());
+
+        /** @var PropertyState $propertyState */
+        $propertyState = $spied->getPropertyState('root');
+
+        $this->assertTrue($propertyState->isModified());
+        $this->assertFalse(!$propertyState->isModified());
+        $this->assertEquals($rootBeforeChange, $propertyState->getInitialValue());
+        $this->assertEquals($fixture->getRoot(), $propertyState->getCurrentValue());
+        $this->assertEquals(GrandParent::class, $propertyState->getFqcn());
+        $this->assertEquals('root', $propertyState->getPropertyName());
+    }
+
+    /**
+     * @dataProvider fixtureProvider
+     */
+    public function testIsModifiedRootNameModificationAndCloner($fixture)
+    {
+        /** @var GrandParent $fixture */
+        $spied = new Spy($fixture);
         $fixture->getRoot()->setName('update name');
         $rootBeforeChange = $this->getRootFixture();
 
