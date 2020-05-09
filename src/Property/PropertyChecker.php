@@ -97,18 +97,29 @@ class PropertyChecker
     }
 
     /**
+     * @var bool true by default will ignore the black listed properties
+     *
+     * @see PropertyCheckerBlackListInterface::propertiesBlackList()
+     *
      * @return PropertyState[]
      */
-    public function getPropertiesModified($initial, $current): array
+    public function getPropertiesModified($initial, $current, bool $strict = true): array
     {
         SpyAssertion::isComparable($initial, $current);
 
         $propertiesModified = [];
 
+        $ignoreBlackListedProperties = $this->ignoreBlackListedProperties($initial, $strict);
+
         $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
 
         foreach ($classInfo->getProperties() as $property) {
             $propertyName = $property->getName();
+
+            if ($ignoreBlackListedProperties && $this->isPropertyBlackListed($initial, $propertyName)) {
+                continue;
+            }
+
             $extracted = new ValueExtractor($initial, $current, $propertyName, $classInfo);
 
             $initialValue = $extracted->getInitialValue();
@@ -143,5 +154,10 @@ class PropertyChecker
     private function containsBlackListedProperties($object): bool
     {
         return $object instanceof PropertyCheckerBlackListInterface;
+    }
+
+    private function ignoreBlackListedProperties($object, bool $strict): bool
+    {
+        return $this->containsBlackListedProperties($object) && true === $strict;
     }
 }

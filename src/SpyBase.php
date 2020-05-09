@@ -26,7 +26,7 @@ final class SpyBase
      *
      * @param object $toSpy
      */
-    public function add(string $id, $toSpy): void
+    public function add(string $id, SpyInterface $toSpy): void
     {
         if (!array_key_exists($id, $this->spies)) {
             $this->spies[$id] = new Spy($toSpy, $this->chainCloner);

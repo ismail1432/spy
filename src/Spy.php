@@ -7,6 +7,7 @@ use Eniams\Spy\Cloner\DeepCopyCloner;
 use Eniams\Spy\Cloner\SpyCloner;
 use Eniams\Spy\Exception\UncopiableException;
 use Eniams\Spy\Property\PropertyChecker;
+use Eniams\Spy\Property\PropertyCheckerBlackListInterface;
 use Eniams\Spy\Property\PropertyState;
 use Eniams\Spy\Property\PropertyStateFactory;
 
@@ -105,9 +106,16 @@ final class Spy
         return $this->propertyChecker = $this->propertyChecker ?: new PropertyChecker();
     }
 
-    // @Todo Implement method that returns an array with the modified properties
-    public function getModifiedProperties()
+    /**
+     * @var bool
+     *
+     * True by default will ignore the black listed properties
+     *
+     * @see PropertyCheckerBlackListInterface::propertiesBlackList()
+     */
+    public function getModifiedProperties($strict = true)
     {
+        return $this->getPropertyChecker()->getPropertiesModified($this->initial, $this->current, $strict);
     }
 
     // @Todo Dispatch an event when the given property is modified
