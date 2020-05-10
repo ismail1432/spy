@@ -7,8 +7,9 @@ use Eniams\Spy\Cloner\DeepCopyCloner;
 use Eniams\Spy\Cloner\DeepCopyClonerInterface;
 use Eniams\Spy\Cloner\SpyClonerInterface;
 use Eniams\Spy\Exception\UndefinedClonerException;
+use PHPUnit\Framework\TestCase;
 
-class UndefinedClonerExceptionTest
+class UndefinedClonerExceptionTest extends TestCase
 {
     public function testSupportUndefinedClonerExceptionWhenNoClonerAreDefined()
     {

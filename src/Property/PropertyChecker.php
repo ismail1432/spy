@@ -3,6 +3,7 @@
 namespace Eniams\Spy\Property;
 
 use Eniams\Spy\Assertion\SpyAssertion;
+use Eniams\Spy\Exception\UndefinedContextForBlackListPropertiesException;
 use Eniams\Spy\Reflection\CacheClassInfoTrait;
 use Eniams\Spy\Reflection\ClassInfo;
 
@@ -14,20 +15,26 @@ class PropertyChecker
     use CacheClassInfoTrait;
 
     /**
+     * @var array
+     */
+    private $blackListedProperties;
+
+    /**
      * object $initial and object $current will be compared to know if $initial was modified.
      *
      * @param object $initial
      * @param object $current
      */
-    public function isModified($initial, $current): bool
+    public function isModified($initial, $current, array $context = []): bool
     {
         SpyAssertion::isComparable($initial, $current);
 
         $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
 
         if ($this->containsBlackListedProperties($initial)) {
+            $this->initializeBlackListProperties($initial, $context);
             // Avoid to check if $initial implements PropertyCheckerBlackListInterface for each loop.
-            return $this->checkIsModifiedWithBlackListedProperties($initial, $current, $classInfo);
+            return $this->checkIsModifiedWithBlackListedProperties($initial, $current, $classInfo, $context);
         }
 
         foreach ($classInfo->getProperties() as $property) {
@@ -78,13 +85,16 @@ class PropertyChecker
      *
      * @param object $initial
      * @param object $current
+     * @param array  $context The to skip properties.
+     *
+     * For context @see PropertyCheckerBlackListInterface::propertiesBlackList
      */
-    private function checkIsModifiedWithBlackListedProperties($initial, $current, ClassInfo $classInfo)
+    private function checkIsModifiedWithBlackListedProperties($initial, $current, ClassInfo $classInfo, array $context = [])
     {
         foreach ($classInfo->getProperties() as $property) {
             $propertyName = $property->getName();
 
-            if ($this->isPropertyBlackListed($initial, $propertyName)) {
+            if ($this->isPropertyBlackListed($propertyName)) {
                 continue;
             }
 
@@ -97,26 +107,28 @@ class PropertyChecker
     }
 
     /**
-     * @var bool true by default will ignore the black listed properties
+     * @param object $initial
+     * @param object $current
+     * @param $skipBlackListedProperties bool true by default will skip the black listed properties
      *
      * @see PropertyCheckerBlackListInterface::propertiesBlackList()
      *
      * @return PropertyState[]
      */
-    public function getPropertiesModified($initial, $current, bool $strict = true): array
+    public function getPropertiesModified($initial, $current, bool $skipBlackListedProperties = true, array $context = []): array
     {
         SpyAssertion::isComparable($initial, $current);
 
         $propertiesModified = [];
 
-        $ignoreBlackListedProperties = $this->ignoreBlackListedProperties($initial, $strict);
+        $ignoreBlackListedProperties = $this->ignoreBlackListedProperties($initial, $skipBlackListedProperties, $context);
 
         $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
 
         foreach ($classInfo->getProperties() as $property) {
             $propertyName = $property->getName();
 
-            if ($ignoreBlackListedProperties && $this->isPropertyBlackListed($initial, $propertyName)) {
+            if ($ignoreBlackListedProperties && $this->isPropertyBlackListed($propertyName)) {
                 continue;
             }
 
@@ -146,9 +158,9 @@ class PropertyChecker
         });
     }
 
-    private function isPropertyBlackListed($object, string $property): bool
+    private function isPropertyBlackListed(string $property): bool
     {
-        return \in_array($property, $object::propertiesBlackList(), true);
+        return \in_array($property, $this->blackListedProperties, true);
     }
 
     private function containsBlackListedProperties($object): bool
@@ -156,8 +168,31 @@ class PropertyChecker
         return $object instanceof PropertyCheckerBlackListInterface;
     }
 
-    private function ignoreBlackListedProperties($object, bool $strict): bool
+    private function ignoreBlackListedProperties($object, bool $skipBlackListedProperties, array $context): bool
     {
-        return $this->containsBlackListedProperties($object) && true === $strict;
+        $ignoreProperties = false;
+
+        if (true === $ignoreProperties = ($this->containsBlackListedProperties($object) && true === $skipBlackListedProperties)) {
+            $this->initializeBlackListProperties($object, $context);
+        }
+
+        return $ignoreProperties;
+    }
+
+    private function initializeBlackListProperties(PropertyCheckerBlackListInterface $object, array $context = []): void
+    {
+        $blackListedProperties = $object::propertiesBlackList();
+        $this->blackListedProperties = [];
+
+        if ([] !== $context) {
+            foreach ($context as $contextName) {
+                if (null === $blackListedList = $blackListedProperties[$contextName] ?? null) {
+                    throw new UndefinedContextForBlackListPropertiesException(sprintf('There is no properties for contex %s', $contextName));
+                }
+                $this->blackListedProperties = array_merge($this->blackListedProperties, $blackListedList);
+            }
+        }
+
+        $this->blackListedProperties = $this->blackListedProperties ?: $blackListedProperties;
     }
 }

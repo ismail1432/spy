@@ -1,9 +1,9 @@
 cs: ## Fix PHP CS
 	./vendor/bin/php-cs-fixer fix --verbose --rules=@Symfony,ordered_imports src/
-	./vendor/bin/php-cs-fixer fix --verbose --rules=@Symfony,ordered_imports Tests/
+	./vendor/bin/php-cs-fixer fix --verbose --rules=@Symfony,ordered_imports tests/
 
 test: ## Run test suite
-	./vendor/bin/phpunit Tests
+	./vendor/bin/simple-phpunit
 
 phpstan: ## Run PHPStan
 	./vendor/bin/phpstan analyse --level=5

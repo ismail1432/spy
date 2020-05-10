@@ -1,5 +1,7 @@
 <?php
 
+namespace Eniams\Spy\Tests;
+
 use Eniams\Spy\Cloner\ChainCloner;
 use Eniams\Spy\Cloner\DeepCopyCloner;
 use Eniams\Spy\Cloner\DeepCopyClonerInterface;

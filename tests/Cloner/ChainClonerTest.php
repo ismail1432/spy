@@ -1,5 +1,7 @@
 <?php
 
+namespace Eniams\Spy\Tests\Cloner;
+
 use PHPUnit\Framework\TestCase;
 
 class ChainClonerTest extends TestCase
