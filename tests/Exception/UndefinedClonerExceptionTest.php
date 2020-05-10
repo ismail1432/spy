@@ -11,26 +11,6 @@ use PHPUnit\Framework\TestCase;
 
 class UndefinedClonerExceptionTest extends TestCase
 {
-    public function testSupportUndefinedClonerExceptionWhenNoClonerAreDefined()
-    {
-        $this->expectException(UndefinedClonerException::class);
-        $this->expectExceptionMessage(sprintf('Unable to resolve the Cloner, Did you forgot to implement %s or %s ?', DeepCopyClonerInterface::class, SpyClonerInterface::class));
-
-        $chainCloner = new ChainCloner([]);
-
-        $chainCloner->supports(new \stdClass());
-    }
-
-    public function testSupportUndefinedClonerExceptionWhenClonerIsNotResolved()
-    {
-        $this->expectException(UndefinedClonerException::class);
-        $this->expectExceptionMessage(sprintf('Unable to resolve the Cloner, Did you forgot to implement %s or %s ?', DeepCopyClonerInterface::class, SpyClonerInterface::class));
-
-        $chainCloner = new ChainCloner([new DeepCopyCloner()]);
-
-        $chainCloner->supports(new Dummy());
-    }
-
     public function testDoCloneUndefinedClonerExceptionWhenNoClonerAreDefined()
     {
         $this->expectException(UndefinedClonerException::class);

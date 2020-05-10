@@ -23,8 +23,6 @@ final class SpyBase
 
     /**
      * Add an object to spy in the spy base.
-     *
-     * @param object $toSpy
      */
     public function add(string $id, SpyInterface $toSpy): void
     {

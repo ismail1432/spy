@@ -5,6 +5,7 @@ namespace Eniams\Spy\Tests\Property;
 use Eniams\Spy\Cloner\SpyClonerInterface;
 use Eniams\Spy\Property\PropertyChecker;
 use Eniams\Spy\Property\PropertyCheckerBlackListInterface;
+use Eniams\Spy\Property\PropertyCheckerContextInterface;
 use Eniams\Spy\Property\PropertyState;
 use Eniams\Spy\Tests\Fixtures\FixtureProviderTrait;
 use Eniams\Spy\Tests\Fixtures\GrandParent;
@@ -134,69 +135,65 @@ class PropertyCheckerTest extends TestCase
         $this->assertFalse($this->propertyChecker->isModified($toSpy, $copy));
     }
 
-    public function testContentBlacklistedPropertiesWithContext()
+    public function testContentPropertiesWithContext()
     {
-        $toSpy = new FooBlackListedWithContext('chapter 1', 'Foo content');
-        $copy = new FooBlackListedWithContext('chapter 1', 'Baz content');
+        $toSpy = new FooWithContextStrategy('chapter 1', 'Foo content');
+        $copy = new FooWithContextStrategy('chapter 1', 'Baz content');
 
-        // False because we don't check `content` as it's passed in context do not check
-        $this->assertFalse($this->propertyChecker->isModified($toSpy, $copy, ['context_do_not_check_content']));
+        // False because we don't check `content` in the context
+        $this->assertFalse($this->propertyChecker->isModifiedInContext($toSpy, $copy, ['context_check_title']));
 
-        // True because we check `content` because we don't pass any context
-        $this->assertTrue($this->propertyChecker->isModified($toSpy, $copy));
+        // True because we check `content` because it's passed in the context
+        $this->assertTrue($this->propertyChecker->isModifiedInContext($toSpy, $copy, ['context_check_content']));
     }
 
-    public function testTitleBlacklistedPropertiesWithContext()
+    public function testTitlePropertiesWithContext()
     {
-        $toSpy = new FooBlackListedWithContext('chapter 1', 'Foo content');
-        $copy = new FooBlackListedWithContext('chapter 1 updated', 'Foo content');
+        $toSpy = new FooWithContextStrategy('chapter 1', 'Foo content');
+        $copy = new FooWithContextStrategy('chapter 1 updated', 'Foo content');
 
-        // False because we don't check `title` as it's passed in context do not check
-        $this->assertFalse($this->propertyChecker->isModified($toSpy, $copy, ['context_do_not_check_title']));
+        // False because we don't check `title` in the context
+        $this->assertFalse($this->propertyChecker->isModifiedInContext($toSpy, $copy, ['context_check_content']));
 
-        // True because we check `title` because we don't pass any context
-        $this->assertTrue($this->propertyChecker->isModified($toSpy, $copy));
+        // True because we check `title` because it's passed in the context
+        $this->assertTrue($this->propertyChecker->isModifiedInContext($toSpy, $copy, ['context_check_title']));
     }
 
-    public function testTitleAndContentBlacklistedPropertiesWithMultipleContext()
+    public function testTitleAndContentPropertiesWithMultipleContext()
     {
-        $toSpy = new FooBlackListedWithContext('chapter 1', 'Foo content');
-        $copy = new FooBlackListedWithContext('chapter 1 updated', 'Bar content');
+        $toSpy = new FooWithContextStrategy('chapter 1', 'Foo content');
+        $copy = new FooWithContextStrategy('chapter 1 updated', 'Bar content');
 
-        // False because we don't check `title` and `content` as they are passed in context do not check
-        $this->assertFalse($this->propertyChecker->isModified($toSpy, $copy, ['context_do_not_check_title', 'context_do_not_check_content']));
-
-        // True because we check `title` and `content` because we don't pass any context
-        $this->assertTrue($this->propertyChecker->isModified($toSpy, $copy));
+        $this->assertTrue($this->propertyChecker->isModifiedInContext($toSpy, $copy, ['context_check_title', 'context_check_content']));
     }
 
-    public function testGetModifiedPropertiesWithFalseStrict()
+    public function testGetModifiedPropertiesWithBlackListContext()
     {
         $toSpy = new TitleBlackListedFoo('chapter 1', 'Foo content');
         $copy = new TitleBlackListedFoo('chapter 2', 'Foo content');
 
-        // `title` will be returned in property modified as the 3rd params ($skipBlackListedProperties) is false.
-        $this->assertCount(1, $this->propertyChecker->getPropertiesModified($toSpy, $copy, false));
-
-        /** @var PropertyState $propertyState */
-        $propertyState = $this->propertyChecker->getPropertiesModified($toSpy, $copy, false)[0];
-        $this->assertInstanceOf(PropertyState::class, $propertyState);
-        $this->assertEquals('chapter 1', $propertyState->getInitialValue());
-        $this->assertEquals('chapter 2', $propertyState->getCurrentValue());
-        $this->assertEquals('title', $propertyState->getPropertyName());
-
         // `title` will not be returned in property modified as the it's exclude in `TitleBlackListedFoo::propertiesBlackList`
-        $this->assertCount(0, $this->propertyChecker->getPropertiesModified($toSpy, $copy));
+        $this->assertCount(0, $this->propertyChecker->getPropertiesModifiedWithBlackListContext($toSpy, $copy));
     }
 
-    public function testGetModifiedPropertiesWithFalseStrictAndContext()
+    public function testGetModifiedPropertiesInContext()
     {
-        $toSpy = new FooBlackListedWithContext('chapter 1', 'Foo content');
-        $copy = new FooBlackListedWithContext('chapter 2', 'Foo content');
+        $toSpy = new FooWithContextStrategy('chapter 1', 'Foo content');
+        $copy = new FooWithContextStrategy('chapter 2', 'Foo content');
 
-        // `title` will not be returned in property modified even the 3rd params ($skipBlackListedProperties) is false
-        // because the context exclude to check modification on `title`
-        $this->assertCount(0, $this->propertyChecker->getPropertiesModified($toSpy, $copy, false, ['context_do_not_check_content']));
+        // `title` is not returned as it's not defined in the context
+        $this->assertCount(0, $this->propertyChecker->getPropertiesModifiedInContext($toSpy, $copy, ['context_check_content']));
+
+        // `title` is  returned as it's defined in the context
+        $propertiesModified = $this->propertyChecker->getPropertiesModifiedInContext($toSpy, $copy, ['context_check_title']);
+        $this->assertCount(1, $propertiesModified);
+
+        /** @var PropertyState $propertyState */
+        $propertyState = $propertiesModified[0];
+        $this->assertInstanceOf(PropertyState::class, $propertyState);
+        $this->assertEquals('title', $propertyState->getPropertyName());
+        $this->assertEquals('chapter 1', $propertyState->getInitialValue());
+        $this->assertEquals('chapter 2', $propertyState->getCurrentValue());
     }
 }
 
@@ -244,7 +241,7 @@ class ContentBlackListedFoo implements SpyClonerInterface, PropertyCheckerBlackL
     }
 }
 
-class FooBlackListedWithContext implements SpyClonerInterface, PropertyCheckerBlackListInterface
+class FooWithContextStrategy implements SpyClonerInterface, PropertyCheckerContextInterface
 {
     public $title;
     public $content;
@@ -255,11 +252,11 @@ class FooBlackListedWithContext implements SpyClonerInterface, PropertyCheckerBl
         $this->content = $content;
     }
 
-    public static function propertiesBlackList(): array
+    public static function propertiesInContext(): array
     {
         return [
-            'context_do_not_check_title' => ['title'],
-            'context_do_not_check_content' => ['content'],
+            'context_check_title' => ['title'],
+            'context_check_content' => ['content'],
         ];
     }
 
