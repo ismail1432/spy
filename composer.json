@@ -20,18 +20,23 @@
   },
   "autoload": {
     "psr-4": {
-      "Eniams\\Spy\\": "src/",
-      "Eniams\\Spy\\Tests\\": "Tests/"
+      "Eniams\\Spy\\": "src/"
     },
     "exclude-from-classmap": [
       "/Tests/"
     ]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Eniams\\Spy\\Tests\\": "./tests/"
+    }
+  },
   "minimum-stability": "dev",
   "require-dev": {
-    "phpunit/phpunit": "^8",
     "friendsofphp/php-cs-fixer": "^2.17@dev",
     "phpstan/phpstan": "^0.12.0@dev",
-    "symfony/dependency-injection": "^4.3|^5.0"
+    "symfony/dependency-injection": "^4.3|^5.0",
+    "phpunit/phpunit": "8.0",
+    "symfony/phpunit-bridge": "^5.0"
   }
 }

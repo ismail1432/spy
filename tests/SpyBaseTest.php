@@ -1,12 +1,14 @@
 <?php
 
+namespace Eniams\Spy\Tests;
+
 use Eniams\Spy\Cloner\ChainCloner;
 use Eniams\Spy\Cloner\DeepCopyCloner;
 use Eniams\Spy\Cloner\DeepCopyClonerInterface;
 use Eniams\Spy\Cloner\SpyCloner;
+use Eniams\Spy\Cloner\SpyClonerInterface;
 use Eniams\Spy\Spy;
 use Eniams\Spy\SpyBase;
-use Eniams\Spy\SpyInterface;
 use Eniams\Spy\SpyTrait;
 use PHPUnit\Framework\TestCase;
 
@@ -107,7 +109,7 @@ class Foo implements DeepCopyClonerInterface
     }
 }
 
-class Bar implements SpyInterface
+class Bar implements SpyClonerInterface
 {
     use SpyTrait;
 

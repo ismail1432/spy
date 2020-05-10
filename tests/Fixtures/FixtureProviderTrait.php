@@ -2,6 +2,9 @@
 
 namespace Eniams\Spy\Tests\Fixtures;
 
+/**
+ * @author Smaïne Milianni <contact@smaine.me>
+ */
 trait FixtureProviderTrait
 {
     public function getGrandPaFixture()

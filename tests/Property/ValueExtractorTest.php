@@ -1,5 +1,7 @@
 <?php
 
+namespace Eniams\Spy\Tests\Property;
+
 use Eniams\Spy\Property\ValueExtractor;
 use PHPUnit\Framework\TestCase;
 

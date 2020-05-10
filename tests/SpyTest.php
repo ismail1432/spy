@@ -1,5 +1,7 @@
 <?php
 
+namespace Eniams\Spy\Tests;
+
 use Eniams\Spy\Cloner\ChainCloner;
 use Eniams\Spy\Cloner\DeepCopyCloner;
 use Eniams\Spy\Cloner\SpyCloner;
@@ -200,7 +202,6 @@ final class SpyTest extends TestCase
         $spied = new Spy($fixture, $this->cloner);
         $rootBeforeChange = $this->getRootFixture();
         $fixture->getRoot()->getChildren()[0]->setName('Update children Name');
-
         $this->assertTrue($spied->isModified());
         $this->assertFalse($spied->isNotModified());
 

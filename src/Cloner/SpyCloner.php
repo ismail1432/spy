@@ -8,11 +8,10 @@ class SpyCloner implements ClonerInterface
 {
     use CacheClassInfoTrait;
 
-    private $initialized = false;
-
     private $cachedClassInfo = [];
 
     private $propertyObjectToClone = [];
+    private $toggleInitializedPropertyObjectToClone = false;
 
     /**
      * {@inheritdoc}
@@ -78,11 +77,11 @@ class SpyCloner implements ClonerInterface
 
     public function initializePropertyObjectToLoad($object): void
     {
-        if (!$this->initialized) {
-            $this->initialized = true;
+        if (!$this->toggleInitializedPropertyObjectToClone) {
             $this->propertyObjectToClone = $this->supportCloneObjectProperties($object) ?
                 /* @var SpyClonerLoadPropertyObjectInterface $object */
                 $object::getPropertiesObjectToClone() : [];
+            $this->toggleInitializedPropertyObjectToClone = true;
         }
     }
 }

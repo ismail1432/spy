@@ -105,9 +105,28 @@ final class Spy
         return $this->propertyChecker = $this->propertyChecker ?: new PropertyChecker();
     }
 
-    // @Todo Implement method that returns an array with the modified properties
-    public function getModifiedProperties()
+    /**
+     * @return PropertyState[]
+     */
+    public function getModifiedProperties(): array
     {
+        return $this->getPropertyChecker()->getPropertiesModified($this->initial, $this->current);
+    }
+
+    /**
+     * @return PropertyState[]
+     */
+    public function getPropertiesModifiedWithBlackListContext(): array
+    {
+        return $this->getPropertyChecker()->getPropertiesModifiedWithBlackListContext($this->initial, $this->current);
+    }
+
+    /**
+     * @return PropertyState[]
+     */
+    public function getPropertiesModifiedInContext(array $context): array
+    {
+        return $this->getPropertyChecker()->getPropertiesModifiedInContext($this->initial, $this->current, $context);
     }
 
     // @Todo Dispatch an event when the given property is modified

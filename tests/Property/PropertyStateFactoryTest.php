@@ -1,5 +1,7 @@
 <?php
 
+namespace Eniams\Spy\Tests\Property;
+
 use Eniams\Spy\Property\PropertyState;
 use Eniams\Spy\Property\PropertyStateFactory;
 use Eniams\Spy\Tests\Fixtures\Children;

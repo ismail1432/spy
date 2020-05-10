@@ -3,6 +3,7 @@
 namespace Eniams\Spy\Property;
 
 use Eniams\Spy\Assertion\SpyAssertion;
+use Eniams\Spy\Exception\UndefinedContextForBlackListPropertiesException;
 use Eniams\Spy\Reflection\CacheClassInfoTrait;
 use Eniams\Spy\Reflection\ClassInfo;
 
@@ -14,31 +15,42 @@ class PropertyChecker
     use CacheClassInfoTrait;
 
     /**
+     * @var array
+     */
+    private $blackListedProperties;
+
+    /**
      * object $initial and object $current will be compared to know if $initial was modified.
      *
      * @param object $initial
      * @param object $current
      */
-    public function isModified($initial, $current): bool
+    public function isModified($initial, $current, array $context = []): bool
     {
         SpyAssertion::isComparable($initial, $current);
 
         $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
 
-        if ($this->containsBlackListedProperties($initial)) {
-            // Avoid to check if $initial implements PropertyCheckerBlackListInterface for each loop.
-            return $this->checkIsModifiedWithBlackListedProperties($initial, $current, $classInfo);
-        }
+        $properties = $this->getFilteredProperties($initial, $classInfo->getProperties(), $context);
 
-        foreach ($classInfo->getProperties() as $property) {
-            $propertyName = $property->getName();
-
-            if ($this->isPropertyModified($initial, $current, $propertyName, $classInfo)) {
+        foreach ($properties as $property) {
+            if ($this->isPropertyModified($initial, $current, $property->getName(), $classInfo)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * object $initial and object $current will be compared to know if $initial was modified.
+     *
+     * @param object $initial
+     * @param object $current
+     */
+    public function isModifiedInContext(PropertyCheckerContextInterface $initial, PropertyCheckerContextInterface $current, array $context = []): bool
+    {
+        return $this->isModified($initial, $current, $context);
     }
 
     /**
@@ -74,32 +86,14 @@ class PropertyChecker
     }
 
     /**
-     * object $initial and object $current will be compared to know if $initial was modified except for black listed properties.
-     *
      * @param object $initial
      * @param object $current
-     */
-    private function checkIsModifiedWithBlackListedProperties($initial, $current, ClassInfo $classInfo)
-    {
-        foreach ($classInfo->getProperties() as $property) {
-            $propertyName = $property->getName();
-
-            if ($this->isPropertyBlackListed($initial, $propertyName)) {
-                continue;
-            }
-
-            if ($this->isPropertyModified($initial, $current, $propertyName, $classInfo)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
+     *
      * @return PropertyState[]
+     *
+     * @see PropertyCheckerBlackListInterface::propertiesBlackList()
      */
-    public function getPropertiesModified($initial, $current): array
+    public function getPropertiesModified($initial, $current, array $context = []): array
     {
         SpyAssertion::isComparable($initial, $current);
 
@@ -107,8 +101,11 @@ class PropertyChecker
 
         $classInfo = $this->getCacheClassInfo()->getClassInfo($initial);
 
-        foreach ($classInfo->getProperties() as $property) {
+        $properties = $this->getFilteredProperties($initial, $classInfo->getProperties(), $context);
+
+        foreach ($properties as $property) {
             $propertyName = $property->getName();
+
             $extracted = new ValueExtractor($initial, $current, $propertyName, $classInfo);
 
             $initialValue = $extracted->getInitialValue();
@@ -116,16 +113,40 @@ class PropertyChecker
 
             if ($currentValue instanceof \Doctrine\Common\Collections\Collection) {
                 if ([] !== $this->compareCollection($currentValue->toArray(), $initialValue->toArray())) {
-                    $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $currentValue);
+                    $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue,
+                        $currentValue);
                 }
             }
 
             if ($initialValue != $currentValue) {
-                $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue, $currentValue);
+                $propertiesModified[] = PropertyState::create(get_class($initial), $propertyName, $initialValue,
+                    $currentValue);
             }
         }
 
         return $propertiesModified;
+    }
+
+    /**
+     * @param $initial
+     * @param $current
+     *
+     * @return PropertyState[]
+     */
+    public function getPropertiesModifiedWithBlackListContext($initial, $current)
+    {
+        return $this->getPropertiesModified($initial, $current);
+    }
+
+    /**
+     * @param $initial
+     * @param $current
+     *
+     * @return PropertyState[]
+     */
+    public function getPropertiesModifiedInContext($initial, $current, array $context = [])
+    {
+        return $this->getPropertiesModified($initial, $current, $context);
     }
 
     private function compareCollection(array $first, array $second): array
@@ -135,13 +156,58 @@ class PropertyChecker
         });
     }
 
-    private function isPropertyBlackListed($object, string $property): bool
+    /**
+     * @param array $properties \ReflectionProperty[]
+     *
+     * @return \ReflectionProperty[]
+     */
+    private function filterBlackListedProperties(PropertyCheckerBlackListInterface $object, array $properties = []): array
     {
-        return \in_array($property, $object::propertiesBlackList(), true);
+        $blacklistProperties = $object::propertiesBlackList();
+
+        return array_filter($properties, static function (\ReflectionProperty $property) use ($blacklistProperties) {
+            return !\in_array($property->getName(), $blacklistProperties);
+        });
     }
 
-    private function containsBlackListedProperties($object): bool
+    /**
+     * @param array $properties \ReflectionProperty[]
+     *
+     * @return \ReflectionProperty[]
+     */
+    private function filterPropertiesInContext(PropertyCheckerContextInterface $object, array $properties = [], array $context = []): array
     {
-        return $object instanceof PropertyCheckerBlackListInterface;
+        $contextProperties = $object::propertiesInContext();
+        $filteredFromContext = [];
+
+        foreach ($context as $contextName) {
+            if (null === $propertiesToCheck = $contextProperties[$contextName] ?? null) {
+                throw new UndefinedContextForBlackListPropertiesException(sprintf('There is no properties for contex %s', $contextName));
+            }
+            $filteredFromContext = array_merge($filteredFromContext, $propertiesToCheck);
+        }
+
+        return array_filter($properties, static function (\ReflectionProperty $property) use ($filteredFromContext) {
+            return \in_array($property->getName(), $filteredFromContext);
+        });
+    }
+
+    /**
+     * Filter properties with the good strategy, Blacklist, Context or no strategy.
+     *
+     * @param $object
+     *
+     * @return \ReflectionProperty[]
+     */
+    private function getFilteredProperties($object, array $properties = [], array $context = []): array
+    {
+        if ($object instanceof PropertyCheckerBlackListInterface) {
+            return $this->filterBlackListedProperties($object, $properties);
+        }
+        if ($object instanceof PropertyCheckerContextInterface) {
+            return $this->filterPropertiesInContext($object, $properties, $context);
+        }
+
+        return $properties;
     }
 }

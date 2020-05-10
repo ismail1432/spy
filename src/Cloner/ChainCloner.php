@@ -27,20 +27,6 @@ final class ChainCloner
     }
 
     /**
-     * Is the given $object supported by the cloner?
-     */
-    public function supports($data): bool
-    {
-        foreach ($this->cloners as $cloner) {
-            if ($cloner->supports($data)) {
-                return true;
-            }
-        }
-
-        throw new UndefinedClonerException('Unable to resolve the Cloner, Did you forgot to implement %s or %s ?', DeepCopyClonerInterface::class, SpyClonerInterface::class);
-    }
-
-    /**
      * Clones the given object.
      *
      * @param mixed $object
@@ -54,5 +40,7 @@ final class ChainCloner
                 return $cloner->doClone($object);
             }
         }
+
+        throw new UndefinedClonerException(sprintf('Unable to resolve the Cloner, Did you forgot to implement %s or %s ?', DeepCopyClonerInterface::class, SpyClonerInterface::class));
     }
 }
