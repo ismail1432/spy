@@ -103,7 +103,7 @@ $foo->setName('Dude');
 
 $spied->isPropertyModified('name'); // output true
 
-$propertyState = $spied->getPropertState('name');
+$propertyState = $spied->getPropertyState('name');
 
 $propertyState->getFqcn(); // App\Entity\Foo
 $propertyState->getProperty(); // 'name'
@@ -158,3 +158,61 @@ $propertyState->getProperty(); // 'name'
 $propertyState->getInitialValue(); // 'Smaone'
 $propertyState->getCurrentValue(); // 'Dude'
 ``` 
+
+##### More advanced use case
+
+##### You can define a context to check some properties.
+```php
+class User implements SpyClonerInterface, PropertyCheckerContextInterface {
+
+private $age;
+private $adresse;
+private $firstname;
+ public static function propertiesInContext(): array
+    {
+        return [
+            'context_check_firstname' => ['firstname', 'age'],
+            'context_check_adresse' => ['adresse'],
+        ];
+    }
+}
+
+// index.php
+$spied->isModifiedInContext(['context_check_firstname']); // true only if 'firstname', 'age' were modified
+$spied->isModifiedInContext(['context_check_adresse']); // true only if 'adresse' is modified
+$spied->getPropertiesModifiedInContext(['context_check_adresse']); // return modified properties for context context_check_adresse
+```
+
+##### You can define dynamically which properties to check
+```php
+class User implements SpyClonerInterface{
+
+private $age;
+private $adresse;
+private $firstname;
+}
+
+// index.php
+$spied->isModifiedForProperties(['age']); // true only if age was modified
+``` 
+
+##### You can exclude some properties.
+
+```php
+class User implements SpyClonerInterface, PropertyCheckerBlackListInterface {
+
+private $age;
+private $adresse;
+private $firstname;
+
+ public static function propertiesBlackList(): array
+    {
+        return ['age'];
+    }
+}
+// index.php
+$user->setAge(33);
+$spied->isModified(); // return false because $age is blacklisted
+$spied->getPropertiesModifiedWithoutBlackListContext(); // return age even it's blacklisted
+
+```

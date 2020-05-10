@@ -85,24 +85,19 @@ final class Spy
         return !$this->getPropertyChecker()->isModified($this->getInitial(), $this->getCurrent());
     }
 
-    public function isPropertyModified(string $property)
+    public function isModifiedForProperties(array $properties): bool
+    {
+        return $this->getPropertyChecker()->isModifiedForProperties($this->initial, $this->current, $properties);
+    }
+
+    public function isModifiedInContext(array $context): bool
+    {
+        return $this->getPropertyChecker()->isModifiedInContext($this->initial, $this->current, $context);
+    }
+
+    public function isPropertyModified(string $property): bool
     {
         return $this->getPropertyChecker()->isPropertyModified($this->getInitial(), $this->getCurrent(), $property);
-    }
-
-    public function getPropertyState(string $property): PropertyState
-    {
-        return $this->getPropertyStateFactory()::createPropertyState($property, $this->getInitial(), $this->getCurrent());
-    }
-
-    private function getPropertyStateFactory(): PropertyStateFactory
-    {
-        return $this->propertyStateFactory = $this->propertyStateFactory ?: new PropertyStateFactory();
-    }
-
-    public function getPropertyChecker()
-    {
-        return $this->propertyChecker = $this->propertyChecker ?: new PropertyChecker();
     }
 
     /**
@@ -114,11 +109,15 @@ final class Spy
     }
 
     /**
+     * Return modified properties even they are excluded with the black list strategy.
+     *
+     * @see PropertyCheckerBlackListInterface
+     *
      * @return PropertyState[]
      */
-    public function getPropertiesModifiedWithBlackListContext(): array
+    public function getPropertiesModifiedWithoutBlackListContext(): array
     {
-        return $this->getPropertyChecker()->getPropertiesModifiedWithBlackListContext($this->initial, $this->current);
+        return $this->getPropertyChecker()->getPropertiesModifiedWithoutBlackListContext($this->initial, $this->current);
     }
 
     /**
@@ -129,18 +128,23 @@ final class Spy
         return $this->getPropertyChecker()->getPropertiesModifiedInContext($this->initial, $this->current, $context);
     }
 
-    // @Todo Dispatch an event when the given property is modified
-    public function spyProperty(string $property)
+    public function getPropertyState(string $property): PropertyState
     {
-    }
-
-    // @Todo Dispatch an event when the given method is called
-    public function spyMethod(string $method)
-    {
+        return $this->getPropertyStateFactory()::createPropertyState($property, $this->getInitial(), $this->getCurrent());
     }
 
     private function getCloner(): ChainCloner
     {
         return new ChainCloner([new DeepCopyCloner(), new SpyCloner()]);
+    }
+
+    private function getPropertyStateFactory(): PropertyStateFactory
+    {
+        return $this->propertyStateFactory = $this->propertyStateFactory ?: new PropertyStateFactory();
+    }
+
+    private function getPropertyChecker()
+    {
+        return $this->propertyChecker = $this->propertyChecker ?: new PropertyChecker();
     }
 }
