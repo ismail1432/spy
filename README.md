@@ -148,6 +148,7 @@ $spyBase->remove('your_key');
 
 ##### For simple use case that don't need to clone an object, you can also check the difference between 2 "same" classes.
 ```php
+<?php
 $firstUser = (new App\Entity\User())->setName('Smaone');
 $secondUser = (new App\Entity\User())->setName('Dude');
 
@@ -163,6 +164,7 @@ $propertyState->getCurrentValue(); // 'Dude'
 
 ##### You can define a context to check some properties.
 ```php
+<?php
 class User implements SpyClonerInterface, PropertyCheckerContextInterface {
 
 private $age;
@@ -185,6 +187,7 @@ $spied->getPropertiesModifiedInContext(['context_check_adresse']); // return mod
 
 ##### You can define dynamically which properties to check
 ```php
+<?php
 class User implements SpyClonerInterface{
 
 private $age;
@@ -199,6 +202,7 @@ $spied->isModifiedForProperties(['age']); // true only if age was modified
 ##### You can exclude some properties.
 
 ```php
+<?php
 class User implements SpyClonerInterface, PropertyCheckerBlackListInterface {
 
 private $age;
