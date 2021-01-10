@@ -20,7 +20,7 @@ $ composer require eniams/spy
 
 ### Behind the scene:
 
-The initial object will be copied with a specific cloner then value of the initial (copied) object and the manipulated (current) object will be compared on demand to check if there is some modificiations.
+The initial object will be copied with a specific cloner then value of the initial (copied) object and the manipulated (current) object will be compared on demand to check if there is some modifications.
 
 #### Suppose you want to spy a `foo` object to know if it was modified :
 
